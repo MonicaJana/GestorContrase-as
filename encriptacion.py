@@ -7,6 +7,7 @@ from cryptography.fernet import Fernet
 
 def generar_password_aleatorio(longitud=16, incluir_simbolos=True):
 
+    caracteres_permitidos = string.ascii_letters + string.digits
     if incluir_simbolos:
         caracteres_permitidos += string.punctuation
         
