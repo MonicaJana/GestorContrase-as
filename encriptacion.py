@@ -7,15 +7,18 @@ from cryptography.fernet import Fernet
 
 def generar_password_aleatorio(longitud=16, incluir_simbolos=True):
 
-    # Siempre usamos letras y números obligatoriamente
-    caracteres = string.ascii_letters + string.digits
-    
-    # [FUNCIONALIDAD: Incluir/Excluir Símbolos]
     if incluir_simbolos:
-        caracteres += string.punctuation
+        caracteres_permitidos += string.punctuation
         
-    # [FUNCIONALIDAD: Elegir Longitud]
-    return ''.join(secrets.choice(caracteres) for _ in range(longitud))
+    password_acumulada = ""
+
+    for i in range(longitud):
+        # Elegimos un solo carácter al azar de la bolsa permitida
+        caracter_elegido = secrets.choice(caracteres_permitidos)
+        # Lo acumulamos en nuestra variable de texto plano
+        password_acumulada += caracter_elegido
+        
+    return password_acumulada
 
 def evaluar_nivel_seguridad(password: str) -> tuple:
     
@@ -23,17 +26,36 @@ def evaluar_nivel_seguridad(password: str) -> tuple:
     # devolviendo un texto descriptivo y un color para la interfaz gráfica 
     
     longitud = len(password)
-    tiene_numeros = any(c.isdigit() for c in password)
-    tiene_simbolos = any(c in string.punctuation for c in password)
     
+    # Inicializamos contadores
+    contador_numeros = 0
+    contador_simbolos = 0
+    
+    # Indicará en qué posición de la palabra estamos parados (0, 1, 2...)
+    puntero = 0 
+    
+    # El ciclo continuará ejecutándose MIENTRAS el puntero no llegue al final de la palabra.
+    # No sabemos cuántos caracteres tiene la clave de antemano; el ciclo frena al terminar la cadena.
+    while puntero < longitud:
+        caracter_actual = password[puntero] # Extraemos la letra actual
+        
+        # Evaluamos el carácter usando condicionales
+        if caracter_actual.isdigit():
+            contador_numeros += 1
+        elif caracter_actual in string.punctuation:
+            contador_simbolos += 1
+            
+        # Avanzamos el puntero para evitar un bucle infinito
+        puntero += 1 
+
     if longitud < 10:
         return "🔴 Débil (Muy corta)", "red"
     elif longitud >= 10 and longitud < 14:
-        if tiene_numeros or tiene_simbolos:
+        if contador_numeros > 0 or contador_simbolos > 0:
             return "🟡 Media (Aceptable)", "orange"
         return "🔴 Débil (Faltan caracteres variados)", "red"
     else: # 14 o más caracteres
-        if tiene_numeros and tiene_simbolos:
+        if contador_numeros > 0 and contador_simbolos > 0:
             return "🟢 Fuerte (Excelente seguridad)", "green"
         return "🟡 Media (Agrega símbolos para mejorar)", "orange"
 
