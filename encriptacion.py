@@ -5,12 +5,37 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
 from cryptography.fernet import Fernet
 
-def generar_password_aleatorio(longitud=16):
-    # Genera una contraseña aleatoria usando 'secrets' para máxima entropía
-    # Utiliza letras, dígitos y caracteres especiales para máxima seguridad
+def generar_password_aleatorio(longitud=16, incluir_simbolos=True):
+
+    # Siempre usamos letras y números obligatoriamente
+    caracteres = string.ascii_letters + string.digits
     
-    caracteres = string.ascii_letters + string.digits + string.punctuation
+    # [FUNCIONALIDAD: Incluir/Excluir Símbolos]
+    if incluir_simbolos:
+        caracteres += string.punctuation
+        
+    # [FUNCIONALIDAD: Elegir Longitud]
     return ''.join(secrets.choice(caracteres) for _ in range(longitud))
+
+def evaluar_nivel_seguridad(password: str) -> tuple:
+    
+    # Analiza la contraseña generada según su longitud y variedad de caracteres, 
+    # devolviendo un texto descriptivo y un color para la interfaz gráfica 
+    
+    longitud = len(password)
+    tiene_numeros = any(c.isdigit() for c in password)
+    tiene_simbolos = any(c in string.punctuation for c in password)
+    
+    if longitud < 10:
+        return "🔴 Débil (Muy corta)", "red"
+    elif longitud >= 10 and longitud < 14:
+        if tiene_numeros or tiene_simbolos:
+            return "🟡 Media (Aceptable)", "orange"
+        return "🔴 Débil (Faltan caracteres variados)", "red"
+    else: # 14 o más caracteres
+        if tiene_numeros and tiene_simbolos:
+            return "🟢 Fuerte (Excelente seguridad)", "green"
+        return "🟡 Media (Agrega símbolos para mejorar)", "orange"
 
 def derivar_llave_maestra(password_maestra: str, sal: bytes) -> bytes:
     # Deriva la llave maestra usando PBKDF2 con SHA256
