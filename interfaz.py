@@ -136,3 +136,51 @@ class AplicacionGestor:
             self.ventana_principal.clipboard_append(clave)
             messagebox.showinfo("Portapapeles", "Contraseña copiada al portapapeles.")
 
+    def evento_guardar(self):
+        # Guarda una nueva credencial cifrada en la base de datos
+        sitio = self.txt_sitio.get()
+        usuario = self.txt_usuario.get()
+        password = self.txt_password_generada.get()
+
+        if not sitio or not usuario or not password:
+            messagebox.showwarning("Campos vacíos", "Por favor completa el formulario y genera una contraseña.")
+            return
+
+        # Cifra la contraseña antes de almacenarla en la base de datos
+        password_cifrada = encriptacion.encriptar_dato(password, self.llave_aes)
+        base_datos.guardar_credencial(sitio, usuario, password_cifrada)
+        
+        messagebox.showinfo("Éxito", f"Credencial para {sitio} almacenada de forma segura.")
+        
+        # Limpia los campos del formulario después de guardar
+        self.txt_sitio.delete(0, tk.END)
+        self.txt_usuario.delete(0, tk.END)
+        self.txt_password_generada.delete(0, tk.END)
+        self.actualizar_lista_gui()
+
+    def actualizar_lista_gui(self):
+        # Actualiza la lista visual con todas las credenciales guardadas
+        self.lista_box.delete(0, tk.END)
+        self.lista_datos_raw = base_datos.obtainer_todas_credenciales() if hasattr(base_datos, 'obtainer_todas_credenciales') else base_datos.obtener_todas_credenciales()
+        for item in self.lista_datos_raw:
+            # Muestra el sitio y usuario de forma legible con emojis
+            self.lista_box.insert(tk.END, f"🌐 Sitio: {item[1]}  |  👤 Usuario: {item[2]}")
+
+    def evento_consultar_y_copiar(self, event):
+        # Descifra y copia al portapapeles la contraseña al hacer doble clic
+        seleccion = self.lista_box.curselection()
+        if not seleccion:
+            return
+        
+        indice = seleccion[0]
+        datos_cuenta = self.lista_datos_raw[indice]
+        bytes_cifrados = datos_cuenta[3]
+
+        try:
+            # Descifra la contraseña en memoria RAM solo durante esta operación
+            password_real = encriptacion.desencriptar_dato(bytes_cifrados, self.llave_aes)
+            self.ventana_principal.clipboard_clear()
+            self.ventana_principal.clipboard_append(password_real)
+            messagebox.showinfo("Bóveda", f"¡Contraseña de {datos_cuenta[1]} descifrada en RAM y copiada al portapapeles!")
+        except Exception:
+            messagebox.showerror("Error", "No se pudo descifrar el dato.")

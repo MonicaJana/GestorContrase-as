@@ -14,7 +14,7 @@ def generar_password_aleatorio(longitud=16, incluir_simbolos=True):
     password_acumulada = ""
 
     for i in range(longitud):
-        # Elegimos un solo carácter al azar de la bolsa permitida
+        # Elegimos un solo carácter al azarpermitida
         caracter_elegido = secrets.choice(caracteres_permitidos)
         # Lo acumulamos en nuestra variable de texto plano
         password_acumulada += caracter_elegido
