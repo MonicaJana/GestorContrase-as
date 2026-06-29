@@ -107,6 +107,29 @@ class AplicacionGestor:
         self.lbl_nivel_seguridad = ctk.CTkLabel(marco_gen, text="Esperando contraseña...", font=("Arial", 12, "italic"), text_color="gray")
         self.lbl_nivel_seguridad.grid(row=2, column=1, padx=10, pady=5, sticky="w", columnspan=2)
 
+        # === SECCIÓN MEDIA: Formulario de almacenamiento ===
+        marco_form = ctk.CTkFrame(self.ventana_principal)
+        marco_form.pack(pady=10, padx=20, fill="x")
+
+        self.txt_sitio = ctk.CTkEntry(marco_form, placeholder_text="Sitio Web / Aplicación (ej. Netflix)", width=200)
+        self.txt_sitio.grid(row=0, column=0, padx=10, pady=15)
+
+        self.txt_usuario = ctk.CTkEntry(marco_form, placeholder_text="Usuario / Correo", width=200)
+        self.txt_usuario.grid(row=0, column=1, padx=10, pady=15)
+
+        btn_guardar = ctk.CTkButton(marco_form, text="Guardar en Bóveda", fg_color="green", hover_color="darkgreen", command=self.evento_guardar)
+        btn_guardar.grid(row=0, column=2, padx=10, pady=15)
+
+        # === SECCIÓN INFERIOR: Visualización de credenciales ===
+        lbl_lista = ctk.CTkLabel(self.ventana_principal, text="Tus Credenciales Guardadas (Doble clic para copiar contraseña)", font=("Arial", 12, "italic"))
+        lbl_lista.pack(pady=5)
+
+        # Contenedor con lista de credenciales guardadas
+        self.lista_box = tk.Listbox(self.ventana_principal, font=("Arial", 11), bg="#242424", fg="white", selectbackground="#1f538d")
+        self.lista_box.pack(pady=10, padx=20, fill="both", expand=True)
+        self.lista_box.bind("<Double-Button-1>", self.evento_consultar_y_copiar)
+
+        self.actualizar_lista_gui()
         self.ventana_principal.mainloop()
 
     def evento_generar(self):
